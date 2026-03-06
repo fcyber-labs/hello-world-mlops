@@ -1,0 +1,43 @@
+name: CI - Train and Save the model
+
+on: 
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  matrix-pip:
+    name: Train and Save the model
+    runs-on: ubuntu-latest  # Fixed: was "runs-om"
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']  # Fixed: proper syntax for versions
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # Fixed: was "user"
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4  # Fixed: was "user"
+        with:
+          python-version: ${{ matrix.python-version }}  # Fixed: matches matrix name
+      
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip setuptools wheel  # Fixed: was "pis"
+      
+      - name: Install project dependencies
+        run: pip install -r requirements.txt  # Fixed: was "python -m install"
+        # Alternative if you need the module syntax:
+        # run: python -m pip install -r requirements.txt
+
+      - name: Train the model
+        run: |
+          python train.py
+          ls -la artifacts
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4  # Fixed: correct action name
+        with:
+          name: ml-artifacts-${{ matrix.python-version }}-${{ github.run_id }}
+          path: artifacts
